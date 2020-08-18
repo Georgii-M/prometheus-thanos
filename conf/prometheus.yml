@@ -1,0 +1,49 @@
+# A scrape configuration scraping a Node Exporter and the Prometheus server
+# itself.
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+  external_labels:
+    cluster: learningvillage
+    replica: 1
+alerting:
+  alertmanagers:
+    - scheme: http
+      static_configs:
+        - targets: ['alertmanager:9093']
+rule_files:
+  - 'alerts/*.yml'
+scrape_configs:
+  # Scrape Prometheus itself every 10 seconds.
+  - job_name: 'prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'lv-ec2'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    ec2_sd_configs:
+      - region: 'eu-west-1'
+        access_key: AKIAWGZ2GYYWCN3EKRVM
+        secret_key: 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
+        port: 9100
+        refresh_interval: 5m
+    relabel_configs:
+      - source_labels:
+        - '__meta_ec2_tag_Name'
+        target_label: 'instance_name'
+      - source_labels:
+        - '__meta_ec2_instance_id'
+        target_label: 'instance'
+      - source_labels:
+        - '__meta_ec2_public_ip'
+        target_label: 'instance_public_ip'
+      - source_labels:
+        - 'instance_name'
+        regex: cac-prod.*
+        action: keep
+  - job_name: 'axcultures'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    static_configs:
+      - targets: ['100.26.21.174:9100']
