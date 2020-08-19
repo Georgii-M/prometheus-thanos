@@ -55,7 +55,8 @@ services:
       - 8080:8080
     restart: always
     volumes:
-      - /opt/prometheus/bot:/data 
+      - /opt/prometheus/bot:/data
+      - /opt/prometheus/bot/templates:/templates
     environment:
       TELEGRAM_ADMIN: "####"
       TELEGRAM_TOKEN: "######"
